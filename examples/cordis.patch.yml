@@ -1,0 +1,6 @@
+# Same insert as the package-root cordis.patch.yml. Prefer `dsh plugin add`
+# so the bundle layer is appended automatically. Use this file only if you
+# mount the plugin by hand in a profile patch.
+- insert:
+    - id: zpdf
+      name: '@kolmopdf/dsh-zpdf'

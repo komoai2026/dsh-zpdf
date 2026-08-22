@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+*.log
+.env
+zpdf-output/
+.pnpm-store/
+.tmp-cli-settings.yaml
+.dsh
