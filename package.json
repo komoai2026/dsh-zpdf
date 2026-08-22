@@ -133,11 +133,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/komoai2026/dsh-kolmopdf.git"
+    "url": "git+https://github.com/komoai2026/dsh-zpdf.git"
   },
-  "homepage": "https://github.com/komoai2026/dsh-kolmopdf#readme",
+  "homepage": "https://github.com/komoai2026/dsh-zpdf#readme",
   "bugs": {
-    "url": "https://github.com/komoai2026/dsh-kolmopdf/issues"
+    "url": "https://github.com/komoai2026/dsh-zpdf/issues"
   },
   "publishConfig": {
     "access": "public"
