@@ -39,7 +39,7 @@ Install the package into the DSH profile you use (example: `web`). GitHub is the
 dsh plugin --profile web add github:komoai2026/dsh-zpdf
 
 # Equivalent
-dsh plugin --profile web add https://github.com/komoai2026/dsh-kolmopdf.git
+dsh plugin --profile web add https://github.com/komoai2026/dsh-zpdf.git
 ```
 
 This is a git dependency that ships prebuilt `lib/` (no `prepare` script, so `dsh plugin add` does not hit pnpm `allowBuilds`). The package also declares `dsh.bundle`, so `dsh plugin add` appends `@kolmopdf/dsh-zpdf` to the profile's `dsh.profile.bundles` and the plugin mounts on the next start — settings page and tools appear without a hand-written composition row.
