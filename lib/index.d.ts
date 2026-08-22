@@ -109,4 +109,4 @@ declare const name = "zpdf";
 declare const inject: string[];
 declare function apply(ctx: Context, config: Config): void;
 
-export { Config, ZpdfClient, ZpdfError, Config as PluginConfig, type ResolvedConfig, SETTINGS_NAMESPACE, apply, inject, name };
+export { Config, Config as PluginConfig, type ResolvedConfig, SETTINGS_NAMESPACE, ZpdfClient, ZpdfError, apply, inject, name };

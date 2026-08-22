@@ -97,12 +97,14 @@ export class ZpdfClient {
     if (id.length === 0) throw new ZpdfError("api_task_error", { message: "ZPDF response did not include a task id." });
     const queue = typeof body.queue === "object" && body.queue !== null ? body.queue as Record<string, unknown>
       : typeof body.queue_info === "object" && body.queue_info !== null ? body.queue_info as Record<string, unknown> : undefined;
+    const q = queue ?? {};
+    const ahead = q.ahead ?? q.ahead_tasks;
     return {
       task_id: id,
       status: normalizeStatus(body.status),
       points_deducted: Number(body.points_deducted ?? 0),
       remaining_points: Number(body.remaining_points ?? 0),
-      ...(typeof (queue?.ahead ?? queue?.ahead_tasks) === "number" ? { queue_info: { position: Number(queue.position ?? 0), ahead_tasks: Number(queue.ahead ?? queue.ahead_tasks) } } : {}),
+      ...(typeof ahead === "number" ? { queue_info: { position: Number(q.position ?? 0), ahead_tasks: ahead } } : {}),
     };
   }
 
@@ -157,12 +159,14 @@ export class ZpdfClient {
     const queue = typeof body.queue === "object" && body.queue !== null ? body.queue as Record<string, unknown>
       : typeof body.queue_info === "object" && body.queue_info !== null ? body.queue_info as Record<string, unknown> : undefined;
     const result = typeof body.result === "object" && body.result !== null ? body.result as Record<string, unknown> : undefined;
+    const q = queue ?? {};
+    const ahead = q.ahead ?? q.ahead_tasks;
     return {
       success: status === "succeeded",
       status,
       ...(typeof body.message === "string" ? { message: body.message } : typeof error?.message === "string" ? { message: error.message } : {}),
       ...(typeof error?.code === "string" ? { error_code: error.code } : {}),
-      ...(typeof (queue?.ahead ?? queue?.ahead_tasks) === "number" ? { queue_info: { position: Number(queue.position ?? 0), ahead_tasks: Number(queue.ahead ?? queue.ahead_tasks) } } : {}),
+      ...(typeof ahead === "number" ? { queue_info: { position: Number(q.position ?? 0), ahead_tasks: ahead } } : {}),
       ...(result
         ? {
             result: {
