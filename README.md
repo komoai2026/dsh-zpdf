@@ -4,7 +4,7 @@ English | [中文](README.zh.md)
 
 ZPDF tools for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness): high-fidelity PDF→Markdown parsing, layout-preserving PDF translation, Markdown conversion, credit estimates, and balance checks.
 
-Repository: <https://github.com/komoai2026/dsh-kolmopdf>
+Repository: <https://github.com/komoai2026/dsh-zpdf>
 
 ## Features
 
@@ -187,6 +187,12 @@ pnpm check
 ```
 
 `pnpm check` runs TypeScript, Vitest, and the production build.
+
+The optional host-composition test needs the installed Harness package directory:
+
+```bash
+DSH_ROOT=/path/to/node_modules/@deepseek-ai/dsh pnpm test:host
+```
 
 ## Security
 

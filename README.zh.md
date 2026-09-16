@@ -4,7 +4,7 @@
 
 ZPDF Tool 插件，为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 提供高保真 PDF→Markdown 解析、保留版式的 PDF 翻译、Markdown 文档转换、费用预估和余额查询。
 
-仓库：<https://github.com/komoai2026/dsh-kolmopdf>
+仓库：<https://github.com/komoai2026/dsh-zpdf>
 
 ## 功能
 
@@ -39,7 +39,7 @@ ZPDF Tool 插件，为 [DeepSeek Harness](https://github.com/deepseek-ai/deepsee
 dsh plugin --profile web add github:komoai2026/dsh-zpdf
 
 # 等价写法
-dsh plugin --profile web add https://github.com/komoai2026/dsh-kolmopdf.git
+dsh plugin --profile web add https://github.com/komoai2026/dsh-zpdf.git
 ```
 
 这是普通的 Git 依赖：仓库里带编好的 `lib/`，没有 `prepare`，因此不会触发 pnpm `allowBuilds`。同时声明了 `dsh.bundle`，所以 `dsh plugin add` 会把 `@kolmopdf/dsh-zpdf` 写进该 profile 的 `dsh.profile.bundles`，下次启动就会挂载——设置页和 Tool 会自动出现，不必手写 composition 行。
@@ -187,6 +187,12 @@ pnpm check
 ```
 
 `pnpm check` 依次运行 TypeScript 类型检查、Vitest 测试和生产构建。
+
+可选的宿主组合测试需要指定已安装的 Harness 包目录：
+
+```bash
+DSH_ROOT=/path/to/node_modules/@deepseek-ai/dsh pnpm test:host
+```
 
 ## 安全说明
 
