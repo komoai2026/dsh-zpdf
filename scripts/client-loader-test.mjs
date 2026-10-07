@@ -7,16 +7,13 @@
 // stub it here and resolve react from the host install.
 import { createRequire } from "node:module";
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 
-const dshRoot = "C:/Users/dacon/AppData/Local/nvm/v25.2.1/node_modules/@deepseek-ai/dsh";
-const hostRequire = createRequire(join(dshRoot, "package.json"));
-
-const react = hostRequire("react");
+const require = createRequire(import.meta.url);
+const react = require("react");
 const primitivesStub = { Button: () => null, Input: () => null, StateDot: () => null };
 const moduleTable = {
   react,
-  "react/jsx-runtime": hostRequire("react/jsx-runtime"),
+  "react/jsx-runtime": require("react/jsx-runtime"),
   "@deepseek-ai/dsh-client-ui-primitives": primitivesStub,
 };
 const simulateRequire = (id) => {

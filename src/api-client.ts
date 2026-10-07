@@ -7,8 +7,8 @@ import { apiError, ZpdfError } from "./errors.js";
 export interface ClientOptions {
   apiKey: string;
   baseUrl: string;
-  httpTimeoutMs: number;
-  uploadTimeoutMs: number;
+  httpTimeoutMs?: number;
+  uploadTimeoutMs?: number;
 }
 
 /** Hard cap on one result download (2 GiB), enforced against headers and streamed bytes. */
@@ -61,7 +61,16 @@ function normalizeStatus(value: unknown): string {
 }
 
 export class ZpdfClient {
-  constructor(private readonly options: ClientOptions) {}
+  private readonly options: Required<ClientOptions>;
+
+  constructor(options: ClientOptions) {
+    this.options = {
+      apiKey: options.apiKey,
+      baseUrl: options.baseUrl,
+      httpTimeoutMs: options.httpTimeoutMs ?? 60_000,
+      uploadTimeoutMs: options.uploadTimeoutMs ?? 600_000,
+    };
+  }
 
   private headers(): Record<string, string> {
     return { "X-API-Key": this.options.apiKey, Authorization: `Bearer ${this.options.apiKey}` };

@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
+import type { Context as ClientContext } from "@deepseek-ai/cordis";
 import { Button, Input, StateDot } from "@deepseek-ai/dsh-client-ui-primitives";
-import type { ClientRemote, IApiClient } from "@deepseek-ai/dsh-api-remotes/client";
-import type { ConnectionHandle } from "@deepseek-ai/dsh-client-connection/client";
+import type { ClientRemote } from "@deepseek-ai/dsh-api-remotes/client";
 import type { LocaleRuntime } from "@deepseek-ai/dsh-client-locale/client";
 import type { SettingsSectionOwnerProps } from "@deepseek-ai/dsh-client-ui-settings/client";
 import { CREDENTIAL_REF, validateApiKey } from "./constants.js";
@@ -140,7 +139,6 @@ interface TasksView {
 }
 
 interface Injected {
-  api: IApiClient;
   remote: ClientRemote;
   t: Translate;
 }
@@ -203,7 +201,7 @@ function OverviewCard({ title, children, actions }: { title: string; children: R
   );
 }
 
-export function ZpdfSettingsSection({ api, remote, t }: Props) {
+export function ZpdfSettingsSection({ remote, t }: Props) {
   const [state, setState] = useState<State>({ status: "loading", configured: false, writable: false });
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
@@ -218,15 +216,22 @@ export function ZpdfSettingsSection({ api, remote, t }: Props) {
       return { ...rest, status: "loading" };
     });
     try {
-      const response = await api.credentials.describe({ refs: [CREDENTIAL_REF] });
-      if (!response.result.ok) throw new Error(response.result.error.message);
-      const view = response.result.value.credentials[CREDENTIAL_REF];
-      if (view === undefined) throw new Error("The ZPDF credential reference is unavailable.");
-      setState({ status: "ready", configured: view.configured, writable: view.writable });
+      const desc = (remote as any)?.credentials?.describe;
+      let view: { configured?: boolean; writable?: boolean } | undefined;
+      if (typeof desc === "function") {
+        try {
+          const res = await desc([CREDENTIAL_REF]);
+          view = res?.[CREDENTIAL_REF] ?? (Array.isArray(res) ? res[0] : res);
+        } catch {
+          const res = await desc({ refs: [CREDENTIAL_REF] });
+          view = res?.result?.value?.credentials?.[CREDENTIAL_REF] ?? res?.[CREDENTIAL_REF];
+        }
+      }
+      setState({ status: "ready", configured: Boolean(view?.configured), writable: view?.writable ?? true });
     } catch (error) {
       setState({ status: "error", configured: false, writable: false, message: error instanceof Error ? error.message : String(error) });
     }
-  }, [api.credentials]);
+  }, [remote]);
 
   const refreshBalance = useCallback(async () => {
     setBalanceBusy(true);
@@ -265,7 +270,7 @@ export function ZpdfSettingsSection({ api, remote, t }: Props) {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => remote.$on("credentials/reference-updated", () => { void load(); }), [load, remote]);
+  useEffect(() => (remote as any).$on?.("credentials/reference-updated", () => { void load(); }), [load, remote]);
   useEffect(() => { void refreshBalance(); const id = setInterval(() => { void refreshBalance(); }, 30_000); return () => clearInterval(id); }, [refreshBalance]);
   useEffect(() => { void refreshTasks(); const id = setInterval(() => { void refreshTasks(); }, 10_000); return () => clearInterval(id); }, [refreshTasks]);
 
@@ -279,8 +284,15 @@ export function ZpdfSettingsSection({ api, remote, t }: Props) {
     }
     setBusy(true);
     try {
-      const response = await api.credentials.set({ ref: CREDENTIAL_REF, value: key });
-      if (!response.result.ok) throw new Error(response.result.error.message);
+      const setter = (remote as any)?.credentials?.set;
+      if (typeof setter === "function") {
+        try {
+          await setter(CREDENTIAL_REF, key);
+        } catch {
+          const res = await setter({ ref: CREDENTIAL_REF, value: key });
+          if (res?.result && !res.result.ok) throw new Error(res.result.error.message);
+        }
+      }
       setDraft("");
       setState({ status: "ready", configured: true, writable: state.writable, message: t("saved") });
       void refreshBalance();
@@ -295,8 +307,15 @@ export function ZpdfSettingsSection({ api, remote, t }: Props) {
   const clear = async () => {
     setBusy(true);
     try {
-      const response = await api.credentials.unset({ ref: CREDENTIAL_REF });
-      if (!response.result.ok) throw new Error(response.result.error.message);
+      const unsetter = (remote as any)?.credentials?.unset;
+      if (typeof unsetter === "function") {
+        try {
+          await unsetter(CREDENTIAL_REF);
+        } catch {
+          const res = await unsetter({ ref: CREDENTIAL_REF });
+          if (res?.result && !res.result.ok) throw new Error(res.result.error.message);
+        }
+      }
       setDraft("");
       setState({ status: "ready", configured: false, writable: state.writable, message: t("cleared") });
       void refreshBalance();
@@ -440,13 +459,12 @@ export function ZpdfSettingsSection({ api, remote, t }: Props) {
   );
 }
 
-export const inject = ["slots", "locale", "connection", "remote"];
+export const inject = ["slots", "locale", "remote"];
 
 export function apply(ctx: ClientContext): void {
   const locale = ctx.get("locale") as LocaleRuntime;
-  const connection = ctx.get("connection") as ConnectionHandle;
   const remote = ctx.get("remote") as ClientRemote;
-  const slots = ctx.get("slots") as ClientContext["slots"];
+  const slots = ((ctx as any).slots ?? ctx.get("slots")) as any;
   ctx.effect(() => {
     const disposeZh = locale.register(LOCALE_NAMESPACE, "zh", zh);
     const disposeEn = locale.register(LOCALE_NAMESPACE, "en", en);
@@ -458,6 +476,6 @@ export function apply(ctx: ClientContext): void {
     id: "zpdf",
     order: 35,
     label: () => t("nav"),
-    inject: () => ({ api: connection.api, remote, t }),
+    inject: () => ({ remote, t }),
   }, ZpdfSettingsSection));
 }

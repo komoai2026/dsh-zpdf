@@ -19,6 +19,17 @@ describe("resolveConfig", () => {
   it("falls back to the named environment variable", () => {
     expect(resolveConfig({ apiKeyEnv: "CUSTOM" }, { CUSTOM: " sk-env " }).apiKey).toBe("sk-env");
   });
+
+  it("unwraps volatile config getters", () => {
+    const value = resolveConfig({
+      apiKey: { get: () => "literal-key" } as any,
+      baseUrl: { get: () => "https://custom.test///" } as any,
+      pollIntervalMs: { get: () => 5000 } as any,
+    });
+    expect(value.apiKey).toBe("literal-key");
+    expect(value.baseUrl).toBe("https://custom.test");
+    expect(value.pollIntervalMs).toBe(5000);
+  });
 });
 
 describe("API key presentation", () => {

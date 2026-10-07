@@ -23,13 +23,31 @@ interface Config {
     httpTimeoutMs?: number;
     uploadTimeoutMs?: number;
 }
-declare const Config: z<Config>;
+declare const Config: z<Schemastery.ObjectS<NoInfer<{
+    apiKey: z<string, string, "volatile">;
+    apiKeyEnv: z<string, string, "volatile-defined">;
+    baseUrl: z<string, string, "volatile-defined">;
+    outputDir: z<string, string, "volatile-defined">;
+    pollIntervalMs: z<number, number, "volatile-defined">;
+    maxPollMinutes: z<number, number, "volatile-defined">;
+    httpTimeoutMs: z<number, number, "volatile-defined">;
+    uploadTimeoutMs: z<number, number, "volatile-defined">;
+}>>, Schemastery.ObjectT<NoInfer<{
+    apiKey: z<string, string, "volatile">;
+    apiKeyEnv: z<string, string, "volatile-defined">;
+    baseUrl: z<string, string, "volatile-defined">;
+    outputDir: z<string, string, "volatile-defined">;
+    pollIntervalMs: z<number, number, "volatile-defined">;
+    maxPollMinutes: z<number, number, "volatile-defined">;
+    httpTimeoutMs: z<number, number, "volatile-defined">;
+    uploadTimeoutMs: z<number, number, "volatile-defined">;
+}>>, "plain">;
 
 interface ClientOptions {
     apiKey: string;
     baseUrl: string;
-    httpTimeoutMs: number;
-    uploadTimeoutMs: number;
+    httpTimeoutMs?: number;
+    uploadTimeoutMs?: number;
 }
 interface SubmitResult {
     task_id: string;
@@ -106,6 +124,7 @@ declare class ZpdfError extends Error {
 }
 
 declare const name = "zpdf";
+
 declare const inject: string[];
 declare function apply(ctx: Context, config: Config): void;
 
